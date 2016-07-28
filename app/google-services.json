@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "457060095204",
+    "firebase_url": "https://prep-ce8cc.firebaseio.com",
+    "project_id": "prep-ce8cc",
+    "storage_bucket": "prep-ce8cc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457060095204:android:c0aaf1f98281de11",
+        "android_client_info": {
+          "package_name": "ly.generalassemb.prep"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "457060095204-0hs2uvcpe4ulll1anop8cn8i4sk477ms.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmwlWM3PSKZ3YffWh_Ra_rCKCTQRb4gKM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
