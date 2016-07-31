@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -64,9 +65,13 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
 
     // UI references.
     private AutoCompleteTextView mEmailView;
+    private EditText mFirstName;
+    private EditText mLastName;
     private EditText mPasswordView;
+    private EditText mPhoneNumber;
     private View mProgressView;
     private View mLoginFormView;
+    private Button mEmailSignInButton;
 
     // Firebase references
     private FirebaseAuth mAuth;
@@ -75,17 +80,24 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
 
     private String email;
     private String password;
+    private String phoneNumber;
+    private String firstName;
+    private String lastName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
-        setupActionBar();
+        //setupActionBar();
 
         mAuth = FirebaseAuth.getInstance();
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
+
+        mFirstName = (EditText) findViewById(R.id.first_name);
+        mLastName = (EditText) findViewById(R.id.last_name);
+        mPhoneNumber = (EditText) findViewById(R.id.phone_number);
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -99,11 +111,27 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
+
+                mAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(RegistrationActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                Log.d("TAG", "createUserWithEmail:onComplete:" + task.isSuccessful());
+
+                                // If sign in fails, display a message to the user. If sign in succeeds
+                                // the auth state listener will be notified and logic to handle the
+                                // signed in user can be handled in the listener.
+                                if (!task.isSuccessful()) {
+                                    Toast.makeText(RegistrationActivity.this, R.string.auth_failed,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
             }
         });
 
@@ -124,21 +152,7 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
             }
         };
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d("TAG", "createUserWithEmail:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(RegistrationActivity.this, R.string.auth_failed,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
 
         if (user != null) {
             // Name, email address, and profile photo Url
@@ -215,13 +229,13 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-    }
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//    private void setupActionBar() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//            // Show the Up button in the action bar.
+//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        }
+//    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -236,10 +250,17 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
+        mFirstName.setError(null);
+        mLastName.setError(null);
+        mPhoneNumber.setError(null);
+
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        email = mEmailView.getText().toString();
+        password = mPasswordView.getText().toString();
+        phoneNumber = mPhoneNumber.getText().toString();
+        firstName = mFirstName.getText().toString();
+        lastName = mLastName.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -262,6 +283,28 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
             cancel = true;
         }
 
+        if (TextUtils.isEmpty(firstName)) {
+            mFirstName.setError(getString(R.string.error_field_required));
+            focusView = mFirstName;
+            cancel = true;
+        }
+
+        if (TextUtils.isEmpty(lastName)) {
+            mLastName.setError(getString(R.string.error_field_required));
+            focusView = mLastName;
+            cancel = true;
+        }
+
+        if (TextUtils.isEmpty(phoneNumber)) {
+            mPhoneNumber.setError(getString(R.string.error_field_required));
+            focusView = mPhoneNumber;
+            cancel = true;
+        } else if (!isPhoneNumberValid(phoneNumber)) {
+            mPhoneNumber.setError(getString(R.string.error_invalid_phonenumber));
+            focusView = mPhoneNumber;
+            cancel = true;
+        }
+
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -272,6 +315,9 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
+
+            Intent paymentIntent = new Intent(RegistrationActivity.this, PaymentActivity.class);
+            startActivity(paymentIntent);
         }
     }
 
@@ -284,6 +330,11 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
         //TODO: Replace this with your own logic
         return password.length() > 4;
     }
+
+    private boolean isPhoneNumberValid(String phoneNumber) {
+        return phoneNumber.length() == 10;
+    }
+
 
     /**
      * Shows the progress UI and hides the login form.

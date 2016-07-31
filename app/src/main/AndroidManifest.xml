@@ -37,6 +37,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ly.generalassemb.prep.MainActivity"/>
         </activity>
+        <activity
+            android:name=".PaymentActivity"
+            android:label="@string/title_activity_payment"
+            android:parentActivityName=".RegistrationActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ly.generalassemb.prep.RegistrationActivity"/>
+        </activity>
     </application>
 
 </manifest>

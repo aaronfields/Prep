@@ -16,4 +16,6 @@
         completions."
     </string>
     <string name="title_activity_registration">Register</string>
+    <string name="title_activity_payment">Payment</string>
+    <string name="error_invalid_phonenumber">This phone number is invalid</string>
 </resources>
