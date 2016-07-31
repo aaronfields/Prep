@@ -332,7 +332,7 @@ public class RegistrationActivity extends AppCompatActivity implements LoaderCal
     }
 
     private boolean isPhoneNumberValid(String phoneNumber) {
-        return phoneNumber.length() == 10;
+        return phoneNumber.length() >= 10;
     }
 
 
