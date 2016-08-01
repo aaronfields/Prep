@@ -15,6 +15,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+
         mSignIn = (Button) findViewById(R.id.button_signin);
         mRegister = (Button) findViewById(R.id.button_register);
         mSignIn.setOnClickListener(this);
