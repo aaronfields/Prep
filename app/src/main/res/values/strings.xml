@@ -21,4 +21,10 @@
     <string name="error_invalid_creditcard">This credit card number is invalid</string>
     <string name="error_invalid_input">This input in invalid</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_drawer">DrawerActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 </resources>
