@@ -12,9 +12,10 @@ import com.google.firebase.database.FirebaseDatabase;
 public class CourseAdapter extends RecyclerView.Adapter{
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference courseRef = database.getReference().child("subjects");
+    DatabaseReference subjectRef = database.getReference("subjects");
 
-    
+
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return null;
