@@ -1,102 +1,109 @@
 package ly.generalassemb.prep;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
-import com.google.firebase.database.ChildEventListener;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class CourseActivity extends AppCompatActivity {
-    CourseAdapter mCourseAdapter;
-    SubjectAdapter mSubjectAdapter;
-    RecyclerView courseRecyclerView;
-    RecyclerView subjectRecyclerView;
-    RecyclerView.LayoutManager courseLayoutManager;
-    RecyclerView.LayoutManager subjectLayoutManager;
-    List<String> courses;
-    List<String> subjects;
-    FirebaseDatabase database;
-    DatabaseReference courseRef;
-    DatabaseReference subjectRef;
-    DataSnapshot mDataSnapshot;
+    private RecyclerView courseRecyclerView;
+    private RecyclerView.Adapter mAdapter;
 
+    private FirebaseRecyclerAdapter<String, CourseViewHolder> courseAdapter;
 
-
+    private int position;
+    DatabaseReference coursesRef;
+    Query courseQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
 
-        database = FirebaseDatabase.getInstance();
-        courseRef = database.getReference("courses");
-        subjectRef = database.getReference("subjects");
 
-        // Use Firebase UI to populate RecyclerViews
+        Intent intent = getIntent();
+        position = intent.getIntExtra("position", 0);
+        Log.d("POSITION", "POSITION: " + position);
 
-        subjectRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        subjectLayoutManager = new LinearLayoutManager(this);
-        subjectRecyclerView.setLayoutManager(subjectLayoutManager);
-        subjects = new ArrayList<>();
+        FirebaseDatabase myFirebase = FirebaseDatabase.getInstance();
 
-        String subject = mDataSnapshot.getKey();
-        subjects.add(subject);
+        switch (position) {
+            case 3:
+                coursesRef = myFirebase.getReference().child("courses");
+                courseQuery = coursesRef.startAt("CS302").endAt("CS314");
+                //courseQuery = myFirebase.getReference().child("courses").startAt("CS").endAt("CS314");
 
-        for(int i = 0; i < mDataSnapshot.getChildrenCount(); i++){
-            String mSubjects = mDataSnapshot.child("subjects").getValue().toString();
-            String m = new String(mSubjects);
-            // add m to array list;
-            mSubjectAdapter = new SubjectAdapter(subjects, CourseActivity.this);
-            subjectRecyclerView.setAdapter(mSubjectAdapter);
+                courseQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String course = dataSnapshot.getValue(String.class);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
         }
 
 
-        ChildEventListener listener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String subject = dataSnapshot.getKey();
-                subjects.add(subject);
+        courseRecyclerView = (RecyclerView) findViewById(R.id.course_recyclerView);
+        courseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-                for(int i = 0; i < dataSnapshot.getChildrenCount(); i++){
-                    String mSubjects = dataSnapshot.child("subjects").getValue().toString();
-                    String m = new String(mSubjects);
-                    // add m to array list;
-                    mSubjectAdapter = new SubjectAdapter(subjects, CourseActivity.this);
-                    subjectRecyclerView.setAdapter(mSubjectAdapter);
-                }
-            }
+        courseAdapter = new FirebaseRecyclerAdapter<String, CourseViewHolder>(String.class,
+                android.R.layout.two_line_list_item,CourseViewHolder.class, courseQuery) {
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            protected void populateViewHolder(CourseViewHolder viewHolder, String model, final int position) {
+                viewHolder.courseName.setText(model);
 
-            }
+                viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //subjectAdapter.getRef(position);
+                        switch (position) {
+                            case 0:
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                        }
+                    }
+                });
 
             }
         };
-        //subjectRef.addChildEventListener(listener);
 
-
+        courseRecyclerView.setAdapter(courseAdapter);
 
     }
+
+    public static class CourseViewHolder extends RecyclerView.ViewHolder{
+        TextView courseName;
+        View mView;
+
+        public CourseViewHolder(View itemView) {
+            super(itemView);
+            mView = itemView;
+
+            courseName = (TextView) mView.findViewById(android.R.id.text1);
+
+        }
+
+    }
+
+
+
 }

@@ -53,6 +53,22 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ly.generalassemb.prep.RegistrationActivity"/>
         </activity>
+        <activity
+            android:name=".SubjectsActivity"
+            android:label="@string/title_activity_subjects"
+            android:parentActivityName=".LoginActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ly.generalassemb.prep.LoginActivity"/>
+        </activity>
+        <activity
+            android:name=".CourseActivity"
+            android:label="@string/title_activity_courses"
+            android:parentActivityName=".SubjectsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ly.generalassemb.prep.SubjectsActivity"/>
+        </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -79,10 +95,7 @@
             android:label="@string/title_activity_drawer"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".CourseActivity">
-        </activity>
-        <activity android:name=".SubjectsActivity">
-        </activity>
+
     </application>
 
 </manifest>
