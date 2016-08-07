@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.subjectViewHolder>{
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference subjectRef = database.getReference("subjects");
+    DatabaseReference subjectRef = database.getReference().child("subjects");
     LayoutInflater inflater;
     List<String> subjectList;
     Context context;

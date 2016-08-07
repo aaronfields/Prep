@@ -14,8 +14,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.security.auth.Subject;
-
 public class CourseActivity extends AppCompatActivity {
     CourseAdapter mCourseAdapter;
     SubjectAdapter mSubjectAdapter;
@@ -25,10 +23,12 @@ public class CourseActivity extends AppCompatActivity {
     RecyclerView.LayoutManager subjectLayoutManager;
     List<String> courses;
     List<String> subjects;
+    FirebaseDatabase database;
+    DatabaseReference courseRef;
+    DatabaseReference subjectRef;
+    DataSnapshot mDataSnapshot;
 
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference courseRef = database.getReference("courses");
-    DatabaseReference subjectRef = database.getReference("subjects");
+
 
 
     @Override
@@ -36,12 +36,29 @@ public class CourseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
 
+        database = FirebaseDatabase.getInstance();
+        courseRef = database.getReference("courses");
+        subjectRef = database.getReference("subjects");
+
         // Use Firebase UI to populate RecyclerViews
 
         subjectRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         subjectLayoutManager = new LinearLayoutManager(this);
         subjectRecyclerView.setLayoutManager(subjectLayoutManager);
         subjects = new ArrayList<>();
+
+        String subject = mDataSnapshot.getKey();
+        subjects.add(subject);
+
+        for(int i = 0; i < mDataSnapshot.getChildrenCount(); i++){
+            String mSubjects = mDataSnapshot.child("subjects").getValue().toString();
+            String m = new String(mSubjects);
+            // add m to array list;
+            mSubjectAdapter = new SubjectAdapter(subjects, CourseActivity.this);
+            subjectRecyclerView.setAdapter(mSubjectAdapter);
+        }
+
+
         ChildEventListener listener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -49,10 +66,11 @@ public class CourseActivity extends AppCompatActivity {
                 subjects.add(subject);
 
                 for(int i = 0; i < dataSnapshot.getChildrenCount(); i++){
-                    String subjects = dataSnapshot.child("subjects").getValue().toString();
-                    String m = new String(subjects);
+                    String mSubjects = dataSnapshot.child("subjects").getValue().toString();
+                    String m = new String(mSubjects);
                     // add m to array list;
                     mSubjectAdapter = new SubjectAdapter(subjects, CourseActivity.this);
+                    subjectRecyclerView.setAdapter(mSubjectAdapter);
                 }
             }
 
@@ -76,7 +94,7 @@ public class CourseActivity extends AppCompatActivity {
 
             }
         };
-        subjectRef.addChildEventListener(listener);
+        //subjectRef.addChildEventListener(listener);
 
 
 

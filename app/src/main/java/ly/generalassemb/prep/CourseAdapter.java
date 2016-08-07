@@ -3,6 +3,7 @@ package ly.generalassemb.prep;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ import java.util.List;
 public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.courseViewHolder>{
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference courseRef = database.getReference("courses");
+    DatabaseReference courseRef = database.getReference().child("courses");
     LayoutInflater inflater;
     Context context;
     List<String> courseList;
@@ -48,7 +49,9 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.courseView
 
     @Override
     public int getItemCount() {
+        Log.d("TAG", "courseList: " + courseList.size());
         return courseList.size();
+
     }
 
     public class courseViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
