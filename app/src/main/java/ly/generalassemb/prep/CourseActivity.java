@@ -1,15 +1,27 @@
 package ly.generalassemb.prep;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
@@ -24,10 +36,26 @@ public class CourseActivity extends AppCompatActivity {
     DatabaseReference coursesRef;
     Query courseQuery;
 
+    private ListView mDrawerList;
+    private DrawerLayout mDrawerLayout;
+    private ArrayAdapter<String> drawerAdapter;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private String mActivityTitle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course);
+
+        mDrawerList = (ListView) findViewById(R.id.navList);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mActivityTitle = getTitle().toString();
+
+        addDrawerItems();
+        setupDrawer();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
 
         Intent intent = getIntent();
@@ -78,13 +106,14 @@ public class CourseActivity extends AppCompatActivity {
                 android.R.layout.two_line_list_item,CourseViewHolder.class, courseQuery) {
 
             @Override
-            protected void populateViewHolder(CourseViewHolder viewHolder, String model, final int position) {
+            protected void populateViewHolder(final CourseViewHolder viewHolder, final String model, final int position) {
                 viewHolder.courseName.setText(model);
 
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(CourseActivity.this, MapsActivity.class);
+                        intent.putExtra("class", model);
                         startActivity(intent);
 
                     }
@@ -112,5 +141,113 @@ public class CourseActivity extends AppCompatActivity {
     }
 
 
+    private void addDrawerItems() {
+        final String[] osArray = {"Back to Subjects","Payment", "History", "Tutor with Prep", "Account", "Sign Out"};
+        drawerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+        mDrawerList.setAdapter(drawerAdapter);
+
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        Intent subjectsIntent = new Intent(CourseActivity.this, SubjectsActivity.class);
+                        startActivity(subjectsIntent);
+                        break;
+                    case 1:
+                        Intent paymentIntent = new Intent(CourseActivity.this, PaymentActivity.class);
+                        startActivity(paymentIntent);
+                        break;
+                    case 2:
+                        Intent historyIntent = new Intent(CourseActivity.this, HistoryActivity.class);
+                        startActivity(historyIntent);
+                        break;
+                    case 3:
+                        Intent tutorIntent = new Intent(CourseActivity.this, TutorActivity.class);
+                        startActivity(tutorIntent);
+                        break;
+                    case 4:
+                        Intent accountIntent = new Intent(CourseActivity.this, AccountActivity.class);
+                        startActivity(accountIntent);
+                        break;
+                    case 5:
+                        AuthUI.getInstance()
+                                .signOut(CourseActivity.this)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        // user is now signed out
+                                        Toast.makeText(CourseActivity.this, "Signed out", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(CourseActivity.this, SubjectsActivity.class));
+                                        finish();
+                                    }
+                                });
+                        break;
+
+                }
+            }
+        });
+    }
+
+    private void setupDrawer() {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //getSupportActionBar().setTitle("Navigation!");
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                //getSupportActionBar().setTitle(mActivityTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.drawer, menu);
+//        return true;
+//    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        // Activate the navigation drawer toggle
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
 }
