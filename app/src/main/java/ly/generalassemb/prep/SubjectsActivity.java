@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -57,6 +58,13 @@ public class SubjectsActivity extends AppCompatActivity {
                 };
 
         subjectsRecyclerView.setAdapter(subjectAdapter);
+
+        startActivityForResult(
+                AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setProviders(AuthUI.EMAIL_PROVIDER)
+                .build(),
+                7);
 
     }
 
