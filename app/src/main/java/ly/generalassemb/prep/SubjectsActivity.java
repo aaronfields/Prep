@@ -44,6 +44,9 @@ public class SubjectsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subjects);
 
+        Intent intent = new Intent(SubjectsActivity.this, MapsActivity.class);
+        startActivity(intent);
+
         mDrawerList = (ListView)findViewById(R.id.navList);mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
 

@@ -38,12 +38,41 @@ public class CourseActivity extends AppCompatActivity {
         Log.d("POSITION", "POSITION: " + position);
 
         FirebaseDatabase myFirebase = FirebaseDatabase.getInstance();
+        coursesRef = myFirebase.getReference().child("courses");
 
         switch (position) {
+            case 0:
+                courseQuery = coursesRef.startAt("ACC310F").endAt("ACC312");
+                break;
+            case 1:
+                courseQuery = coursesRef.startAt("BIO301D").endAt("BIO325");
+                break;
+            case 2:
+                courseQuery = coursesRef.startAt("CH301").endAt("CH328N");
+                break;
             case 3:
-                coursesRef = myFirebase.getReference().child("courses");
                 courseQuery = coursesRef.startAt("CS302").endAt("CS314");
                 //courseQuery = myFirebase.getReference().child("courses").startAt("CS").endAt("CS314");
+                break;
+            case 4:
+                courseQuery = coursesRef.startAt("ECO301").endAt("ECO420K");
+                break;
+            case 5:
+                courseQuery = coursesRef.startAt("FR601C").endAt("FR611C");
+                break;
+            case 6:
+                courseQuery = coursesRef.startAt("M302").endAt("M408N");
+                break;
+            case 7:
+                courseQuery = coursesRef.startAt("PHY301").endAt("PHY317L");
+                break;
+            case 8:
+                courseQuery = coursesRef.startAt("SPN601D").endAt("SPN611D");
+                break;
+            case 9:
+                courseQuery = coursesRef.startAt("SDS302").endAt("SDS328M");
+                break;
+        }
 
                 courseQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -57,14 +86,14 @@ public class CourseActivity extends AppCompatActivity {
                     }
                 });
 
-        }
+
 
 
         courseRecyclerView = (RecyclerView) findViewById(R.id.course_recyclerView);
         courseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         courseAdapter = new FirebaseRecyclerAdapter<String, CourseViewHolder>(String.class,
-                android.R.layout.two_line_list_item,CourseViewHolder.class, courseQuery) {
+                android.R.layout.two_line_list_item,CourseViewHolder.class, coursesRef) {
 
             @Override
             protected void populateViewHolder(CourseViewHolder viewHolder, String model, final int position) {

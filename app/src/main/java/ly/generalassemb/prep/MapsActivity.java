@@ -62,28 +62,29 @@ public class MapsActivity extends FragmentActivity
     }
 
     protected void onStart() {
-        mGoogleApiClient.connect();
+
         super.onStart();
+        mGoogleApiClient.connect();
     }
 
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+
         super.onStop();
+        mGoogleApiClient.disconnect();
     }
 
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLastLocation = getLocation(mGoogleApiClient);
-        //mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-//        if (mLastLocation != null) {
-////            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-////            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-//            latitude = mLastLocation.getLatitude();
-//            longitude = mLastLocation.getLongitude();
-//            Log.d("LATLONG", "lat = " + latitude + " long = " + longitude);
-//        }
+        mMap.setMyLocationEnabled(true);
+        latitude = mLastLocation.getLatitude();
+        longitude = mLastLocation.getLongitude();
+        currentLocation = new LatLng(latitude, longitude);
+        mMap.addMarker(new MarkerOptions().position(currentLocation));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
     }
 
     public Location getLocation(GoogleApiClient client) {
@@ -101,7 +102,7 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mLastLocation = getLocation(mGoogleApiClient);
+        //mLastLocation = getLocation(mGoogleApiClient);
 
 
         // Add a marker in Sydney and move the camera
@@ -109,11 +110,9 @@ public class MapsActivity extends FragmentActivity
 //        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
-        Log.d("MAPLATLONG", "lat: " + mLastLocation.getLatitude() + " long: "+ mLastLocation.getLatitude());
+        //Log.d("MAPLATLONG", "lat: " + mLastLocation.getLatitude() + " long: "+ mLastLocation.getLatitude());
 
-        currentLocation = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions().position(currentLocation));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+
 
     }
 
