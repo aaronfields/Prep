@@ -10,12 +10,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 public class CourseActivity extends AppCompatActivity {
     private RecyclerView courseRecyclerView;
@@ -42,58 +39,43 @@ public class CourseActivity extends AppCompatActivity {
 
         switch (position) {
             case 0:
-                courseQuery = coursesRef.startAt("ACC310F").endAt("ACC312");
+                courseQuery = coursesRef.orderByKey().startAt("ACC310F").endAt("ACC312");
                 break;
             case 1:
-                courseQuery = coursesRef.startAt("BIO301D").endAt("BIO325");
+                courseQuery = coursesRef.orderByKey().startAt("BIO301D").endAt("BIO325");
                 break;
             case 2:
-                courseQuery = coursesRef.startAt("CH301").endAt("CH328N");
+                courseQuery = coursesRef.orderByKey().startAt("CH301").endAt("CH328N");
                 break;
             case 3:
-                courseQuery = coursesRef.startAt("CS302").endAt("CS314");
-                //courseQuery = myFirebase.getReference().child("courses").startAt("CS").endAt("CS314");
+                courseQuery = coursesRef.orderByKey().startAt("CS302").endAt("CS314");
                 break;
             case 4:
-                courseQuery = coursesRef.startAt("ECO301").endAt("ECO420K");
+                courseQuery = coursesRef.orderByKey().startAt("ECO301").endAt("ECO420K");
                 break;
             case 5:
-                courseQuery = coursesRef.startAt("FR601C").endAt("FR611C");
+                courseQuery = coursesRef.orderByKey().startAt("FR601C").endAt("FR611C");
                 break;
             case 6:
-                courseQuery = coursesRef.startAt("M302").endAt("M408N");
+                courseQuery = coursesRef.orderByKey().startAt("M302").endAt("M408N");
                 break;
             case 7:
-                courseQuery = coursesRef.startAt("PHY301").endAt("PHY317L");
+                courseQuery = coursesRef.orderByKey().startAt("PHY301").endAt("PHY317L");
                 break;
             case 8:
-                courseQuery = coursesRef.startAt("SPN601D").endAt("SPN611D");
+                courseQuery = coursesRef.orderByKey().startAt("SPN601D").endAt("SPN611D");
                 break;
             case 9:
-                courseQuery = coursesRef.startAt("SDS302").endAt("SDS328M");
+                courseQuery = coursesRef.orderByKey().startAt("SDS302").endAt("SDS328M");
                 break;
         }
-
-                courseQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String course = dataSnapshot.getValue(String.class);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-
 
 
         courseRecyclerView = (RecyclerView) findViewById(R.id.course_recyclerView);
         courseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         courseAdapter = new FirebaseRecyclerAdapter<String, CourseViewHolder>(String.class,
-                android.R.layout.two_line_list_item,CourseViewHolder.class, coursesRef) {
+                android.R.layout.two_line_list_item,CourseViewHolder.class, courseQuery) {
 
             @Override
             protected void populateViewHolder(CourseViewHolder viewHolder, String model, final int position) {
