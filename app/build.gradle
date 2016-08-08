@@ -36,5 +36,6 @@ dependencies {
     compile 'com.firebaseui:firebase-ui-auth:0.4.2'
     compile 'com.stripe:stripe-android:+'
     compile 'com.android.support:support-v4:24.1.1'
+    compile 'com.firebase:geofire-android:2.0.0'
 }
 apply plugin: 'com.google.gms.google-services'

@@ -73,13 +73,9 @@ public class CourseActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //subjectAdapter.getRef(position);
-                        switch (position) {
-                            case 0:
+                        Intent intent = new Intent(CourseActivity.this, MapsActivity.class);
+                        startActivity(intent);
 
-
-
-                        }
                     }
                 });
 
