@@ -131,10 +131,6 @@ public class SubjectsActivity extends AppCompatActivity {
                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
                 ref.child("users").child(UID).setValue(map);
 
-//                User mUser = new User(UID, name, email);
-//                mUser.setUID(FirebaseAuth.getInstance().getCurrentUser().getUid());
-//                mUser.setDisplayName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-//                mUser.setEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
             }
         }
 

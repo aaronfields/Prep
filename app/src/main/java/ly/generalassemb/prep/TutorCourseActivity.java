@@ -2,11 +2,11 @@ package ly.generalassemb.prep;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -26,36 +26,35 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TutorActivity extends AppCompatActivity {
+public class TutorCourseActivity extends AppCompatActivity {
 
-    private RecyclerView subjectsRecyclerView;
-    private ArrayList<String> mSubjects = new ArrayList<>();
+    private RecyclerView courseRecyclerView;
     private RecyclerView.Adapter mAdapter;
 
-    private FirebaseRecyclerAdapter<String, TutorActivity.SubjectViewHolder> subjectAdapter;
-    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseRecyclerAdapter<String, CourseViewHolder> courseAdapter;
+
+    private int position;
+    DatabaseReference coursesRef;
+    Query courseQuery;
 
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
     private ArrayAdapter<String> drawerAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityTitle;
-
-    private static int RC_SIGN_IN = 7;
-
+    private String UID;
     private String name;
     private String email;
-    private String UID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tutor);
+        setContentView(R.layout.activity_tutor_course);
 
         mDrawerList = (ListView) findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -67,26 +66,82 @@ public class TutorActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
+
+        Intent intent = getIntent();
+        position = intent.getIntExtra("position", 0);
+        Log.d("POSITION", "POSITION: " + position);
+
         FirebaseDatabase myFirebase = FirebaseDatabase.getInstance();
-        DatabaseReference subjectsRef = myFirebase.getReference().child("subjects");
+        coursesRef = myFirebase.getReference().child("courses");
 
-        subjectsRecyclerView = (RecyclerView) findViewById(R.id.subjects_recyclerView);
-        subjectsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        switch (position) {
+            case 0:
+                courseQuery = coursesRef.orderByKey().startAt("ACC310F").endAt("ACC312");
+                break;
+            case 1:
+                courseQuery = coursesRef.orderByKey().startAt("BIO301D").endAt("BIO325");
+                break;
+            case 2:
+                courseQuery = coursesRef.orderByKey().startAt("CH301").endAt("CH328N");
+                break;
+            case 3:
+                courseQuery = coursesRef.orderByKey().startAt("CS302").endAt("CS314");
+                break;
+            case 4:
+                courseQuery = coursesRef.orderByKey().startAt("ECO301").endAt("ECO420K");
+                break;
+            case 5:
+                courseQuery = coursesRef.orderByKey().startAt("FR601C").endAt("FR611C");
+                break;
+            case 6:
+                courseQuery = coursesRef.orderByKey().startAt("M302").endAt("M408N");
+                break;
+            case 7:
+                courseQuery = coursesRef.orderByKey().startAt("PHY301").endAt("PHY317L");
+                break;
+            case 8:
+                courseQuery = coursesRef.orderByKey().startAt("SPN601D").endAt("SPN611D");
+                break;
+            case 9:
+                courseQuery = coursesRef.orderByKey().startAt("SDS302").endAt("SDS328M");
+                break;
+        }
 
-        subjectAdapter = new FirebaseRecyclerAdapter<String, SubjectViewHolder>(String.class,
-                android.R.layout.two_line_list_item, SubjectViewHolder.class, subjectsRef) {
+
+        courseRecyclerView = (RecyclerView) findViewById(R.id.course_recyclerView);
+        courseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        courseAdapter = new FirebaseRecyclerAdapter<String, CourseViewHolder>(String.class,
+                android.R.layout.two_line_list_item,CourseViewHolder.class, courseQuery) {
 
             @Override
-            protected void populateViewHolder(SubjectViewHolder viewHolder, String model, final int position) {
-                viewHolder.subjectName.setText(model);
+            protected void populateViewHolder(final CourseViewHolder viewHolder, final String model, final int position) {
+                viewHolder.courseName.setText(model);
 
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //subjectAdapter.getRef(position);
-                        Intent intent = new Intent(TutorActivity.this, TutorCourseActivity.class);
-                        intent.putExtra("position", position);
+                        Intent intent = new Intent(TutorCourseActivity.this, AvailableActivity.class);
+                        intent.putExtra("class", model);
                         startActivity(intent);
+
+                        FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
+                        if (tutor != null) {
+                            // Name, email address, and profile photo Url
+                            name = tutor.getDisplayName();
+                            email = tutor.getEmail();
+                            UID = tutor.getUid();
+
+                            Map<String, String> map = new HashMap<>();
+                            //map.put("UID", UID);
+                            map.put("displayname", name);
+                            map.put("email", email);
+                            map.put("courses", model);
+
+                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                            ref.child("tutors").child(UID).setValue(map);
+
+                        }
 
                     }
                 });
@@ -94,63 +149,29 @@ public class TutorActivity extends AppCompatActivity {
             }
         };
 
-        subjectsRecyclerView.setAdapter(subjectAdapter);
-
-//        startActivityForResult(
-//                AuthUI.getInstance()
-//                        .createSignInIntentBuilder()
-//                        .build(),
-//                RC_SIGN_IN);
-
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RC_SIGN_IN) {
-            if (resultCode == RESULT_OK) {
-                Log.d("EventsActivity", "This is the current email: " +
-                        FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                Log.d("EventsActivity", "This is the current uid: " +
-                        FirebaseAuth.getInstance().getCurrentUser().getUid());
-
-            }
-            FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
-            if (tutor != null) {
-                // Name, email address, and profile photo Url
-                name = tutor.getDisplayName();
-                email = tutor.getEmail();
-                UID = tutor.getUid();
-
-                Map<String, String> map = new HashMap<>();
-                //map.put("UID", UID);
-                map.put("displayname", name);
-                map.put("email", email);
-
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-                ref.child("tutors").child(UID).setValue(map);
-
-            }
-        }
-
+        courseRecyclerView.setAdapter(courseAdapter);
 
     }
 
 
-    public static class SubjectViewHolder extends RecyclerView.ViewHolder {
-        TextView subjectName;
+
+    public static class CourseViewHolder extends RecyclerView.ViewHolder{
+        TextView courseName;
         View mView;
 
-        public SubjectViewHolder(View itemView) {
+        public CourseViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
 
-            subjectName = (TextView) mView.findViewById(android.R.id.text1);
+            courseName = (TextView) mView.findViewById(android.R.id.text1);
 
         }
 
     }
 
+
     private void addDrawerItems() {
-        final String[] osArray = {"Payment", "History", "Find a Tutor", "Account", "Sign Out"};
+        final String[] osArray = {"Back to Subjects","Payment", "History", "Tutor with Prep", "Account", "Sign Out"};
         drawerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
         mDrawerList.setAdapter(drawerAdapter);
 
@@ -159,29 +180,33 @@ public class TutorActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        Intent paymentIntent = new Intent(TutorActivity.this, PaymentActivity.class);
-                        startActivity(paymentIntent);
+                        Intent subjectsIntent = new Intent(TutorCourseActivity.this, SubjectsActivity.class);
+                        startActivity(subjectsIntent);
                         break;
                     case 1:
-                        Intent historyIntent = new Intent(TutorActivity.this, HistoryActivity.class);
-                        startActivity(historyIntent);
+                        Intent paymentIntent = new Intent(TutorCourseActivity.this, PaymentActivity.class);
+                        startActivity(paymentIntent);
                         break;
                     case 2:
-                        Intent tutorIntent = new Intent(TutorActivity.this, SubjectsActivity.class);
-                        startActivity(tutorIntent);
+                        Intent historyIntent = new Intent(TutorCourseActivity.this, HistoryActivity.class);
+                        startActivity(historyIntent);
                         break;
                     case 3:
-                        Intent accountIntent = new Intent(TutorActivity.this, AccountActivity.class);
-                        startActivity(accountIntent);
+                        Intent tutorIntent = new Intent(TutorCourseActivity.this, TutorActivity.class);
+                        startActivity(tutorIntent);
                         break;
                     case 4:
+                        Intent accountIntent = new Intent(TutorCourseActivity.this, AccountActivity.class);
+                        startActivity(accountIntent);
+                        break;
+                    case 5:
                         AuthUI.getInstance()
-                                .signOut(TutorActivity.this)
+                                .signOut(TutorCourseActivity.this)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         // user is now signed out
-                                        Toast.makeText(TutorActivity.this, "Signed out", Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(TutorActivity.this, SubjectsActivity.class));
+                                        Toast.makeText(TutorCourseActivity.this, "Signed out", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(TutorCourseActivity.this, SubjectsActivity.class));
                                         finish();
                                     }
                                 });
@@ -252,6 +277,5 @@ public class TutorActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-
     }
 }

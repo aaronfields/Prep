@@ -14,9 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,10 +30,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -46,8 +45,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MapsActivity extends AppCompatActivity
-        implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class AvailableActivity extends AppCompatActivity
+        implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
+
+    private String availability;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
@@ -76,7 +79,6 @@ public class MapsActivity extends AppCompatActivity
     private String mClass;
 
     private ImageView pinButton;
-    private Button requestTutor;
     private LatLng myLatLng;
     private String name;
     private String email;
@@ -84,18 +86,16 @@ public class MapsActivity extends AppCompatActivity
     private String myLatitude;
     private String myLongitude;
 
-
+    private Switch mswitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-
-        pinButton = (ImageView) findViewById(R.id.imageMarker);
-        requestTutor = (Button) findViewById(R.id.request_button);
+        setContentView(R.layout.activity_available);
 
         Intent intent = getIntent();
         mClass = intent.getStringExtra("class");
+
 
         mDrawerList = (ListView)findViewById(R.id.navList);mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
@@ -105,13 +105,13 @@ public class MapsActivity extends AppCompatActivity
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle(mClass);
+        getSupportActionBar().setTitle("Availabe");
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+//                .findFragmentById(R.id.tutor_map);
+//        mapFragment.getMapAsync(this);
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -120,6 +120,7 @@ public class MapsActivity extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
+
 
     }
 
@@ -135,19 +136,79 @@ public class MapsActivity extends AppCompatActivity
         mGoogleApiClient.disconnect();
     }
 
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLastLocation = getLocation(mGoogleApiClient);
 
-        mMap.setMyLocationEnabled(true);
-        mMap.setBuildingsEnabled(true);
+//        mMap.setMyLocationEnabled(true);
+//        mMap.setBuildingsEnabled(true);
         latitude = mLastLocation.getLatitude();
         longitude = mLastLocation.getLongitude();
         currentLocation = new LatLng(latitude, longitude);
-        //mMap.addMarker(new MarkerOptions().position(currentLocation));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+//        mMap.addMarker(new MarkerOptions().position(currentLocation));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+//        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+
+        mswitch = (Switch) findViewById(R.id.availability_switch);
+        mswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled
+                    availability = "yes";
+
+                    myLatLng = new LatLng(latitude, longitude);
+                    myLatitude = Double.toString(latitude);
+                    myLongitude = Double.toString(longitude);
+
+                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
+                    if (tutor != null) {
+                        // Name, email address, and profile photo Url
+                        name = tutor.getDisplayName();
+                        email = tutor.getEmail();
+                        UID = tutor.getUid();
+
+                        Map<String, String> map = new HashMap<>();
+                        //map.put("UID", UID);
+                        map.put("displayname", name);
+                        map.put("email", email);
+                        map.put("available", availability);
+                        map.put("courses", mClass);
+                        map.put("latitude", myLatitude);
+                        map.put("longitude", myLongitude);
+
+                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                        ref.child("tutors").child(UID).setValue(map);
+
+                    }
+                } else {
+                    // The toggle is disabled
+
+                    availability = "no";
+
+                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
+                    if (tutor != null) {
+                        // Name, email address, and profile photo Url
+                        name = tutor.getDisplayName();
+                        email = tutor.getEmail();
+                        UID = tutor.getUid();
+
+                        Map<String, String> map = new HashMap<>();
+                        //map.put("UID", UID);
+                        map.put("displayname", name);
+                        map.put("email", email);
+                        map.put("available", availability);
+                        map.put("courses", mClass);
+
+
+                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                        ref.child("tutors").child(UID).setValue(map);
+
+                    }
+                }
+            }
+
+        });
+
     }
 
     public Location getLocation(GoogleApiClient client) {
@@ -160,6 +221,16 @@ public class MapsActivity extends AppCompatActivity
             Log.d("LATLONG", "lat = " + latitude + " long = " + longitude);
         }
         return location;
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     @Override
@@ -177,51 +248,8 @@ public class MapsActivity extends AppCompatActivity
 
                 Log.d("centerLong","here: "+cameraPosition.target.longitude);
 
-                requestTutor.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        myLatLng = new LatLng(latitude, longitude);
-                        myLatitude = Double.toString(latitude);
-                        myLongitude = Double.toString(longitude);
-
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        if (user != null) {
-                            name = user.getDisplayName();
-                            email = user.getEmail();
-                            UID = user.getUid();
-
-                            Map<String, String> map = new HashMap<>();
-                            //map.put("UID", UID);
-                            map.put("displayname", name);
-                            map.put("email", email);
-                            map.put("course", mClass);
-                            map.put("latitude", myLatitude);
-                            map.put("longitude", myLongitude);
-
-                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-                            ref.child("users").child(UID).setValue(map);
-
-                        }
-
-                    }
-                });
-
             }
         });
-
-
-
-
-
-        //mLastLocation = getLocation(mGoogleApiClient);
-
-
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-        //Log.d("MAPLATLONG", "lat: " + mLastLocation.getLatitude() + " long: "+ mLastLocation.getLatitude());
 
 
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
@@ -241,23 +269,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-
-
     }
-
-
-
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
 
     private void addDrawerItems() {
         String[] osArray = { "Back to Courses", "Payment", "History", "Tutor with Prep", "Account", "Sign Out"};
@@ -269,33 +281,33 @@ public class MapsActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position){
                     case 0:
-                        Intent courseIntent = new Intent(MapsActivity.this, CourseActivity.class);
+                        Intent courseIntent = new Intent(AvailableActivity.this, CourseActivity.class);
                         startActivity(courseIntent);
                         break;
                     case 1:
-                        Intent paymentIntent = new Intent(MapsActivity.this, PaymentActivity.class);
+                        Intent paymentIntent = new Intent(AvailableActivity.this, PaymentActivity.class);
                         startActivity(paymentIntent);
                         break;
                     case 2:
-                        Intent historyIntent = new Intent(MapsActivity.this, HistoryActivity.class);
+                        Intent historyIntent = new Intent(AvailableActivity.this, HistoryActivity.class);
                         startActivity(historyIntent);
                         break;
                     case 3:
-                        Intent tutorIntent = new Intent(MapsActivity.this, TutorActivity.class);
+                        Intent tutorIntent = new Intent(AvailableActivity.this, TutorActivity.class);
                         startActivity(tutorIntent);
                         break;
                     case 4:
-                        Intent accountIntent = new Intent(MapsActivity.this, AccountActivity.class);
+                        Intent accountIntent = new Intent(AvailableActivity.this, AccountActivity.class);
                         startActivity(accountIntent);
                         break;
                     case 5:
                         AuthUI.getInstance()
-                                .signOut(MapsActivity.this)
+                                .signOut(AvailableActivity.this)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         // user is now signed out
-                                        Toast.makeText(MapsActivity.this, "Signed out", Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(MapsActivity.this, SubjectsActivity.class));
+                                        Toast.makeText(AvailableActivity.this, "Signed out", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(AvailableActivity.this, SubjectsActivity.class));
                                         finish();
                                     }
                                 });

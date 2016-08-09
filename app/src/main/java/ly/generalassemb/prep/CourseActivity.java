@@ -22,9 +22,14 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CourseActivity extends AppCompatActivity {
     private RecyclerView courseRecyclerView;
@@ -41,6 +46,9 @@ public class CourseActivity extends AppCompatActivity {
     private ArrayAdapter<String> drawerAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityTitle;
+    private String UID;
+    private String name;
+    private String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +124,23 @@ public class CourseActivity extends AppCompatActivity {
                         intent.putExtra("class", model);
                         startActivity(intent);
 
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        if (user != null) {
+                            name = user.getDisplayName();
+                            email = user.getEmail();
+                            UID = user.getUid();
+
+                            Map<String, String> map = new HashMap<>();
+                            //map.put("UID", UID);
+                            map.put("displayname", name);
+                            map.put("email", email);
+                            map.put("course", model);
+
+                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                            ref.child("users").child(UID).setValue(map);
+
+                        }
+
                     }
                 });
 
@@ -125,6 +150,8 @@ public class CourseActivity extends AppCompatActivity {
         courseRecyclerView.setAdapter(courseAdapter);
 
     }
+
+
 
     public static class CourseViewHolder extends RecyclerView.ViewHolder{
         TextView courseName;
