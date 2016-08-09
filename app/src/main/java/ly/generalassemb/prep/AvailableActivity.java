@@ -1,5 +1,6 @@
 package ly.generalassemb.prep;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
@@ -8,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -24,31 +26,35 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AvailableActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnMarkerClickListener{
 
     private String availability;
 
@@ -68,6 +74,10 @@ public class AvailableActivity extends AppCompatActivity
     private double longitude;
     private Location location;
 
+    private LatLng userLocation;
+    private double userLatitude;
+    private double userLongitude;
+
     private LatLng currentLocation;
     Marker currLocationMarker;
 
@@ -77,6 +87,7 @@ public class AvailableActivity extends AppCompatActivity
     private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityTitle;
     private String mClass;
+    private String userClass;
 
     private ImageView pinButton;
     private LatLng myLatLng;
@@ -85,6 +96,9 @@ public class AvailableActivity extends AppCompatActivity
     private String UID;
     private String myLatitude;
     private String myLongitude;
+    private MarkerOptions options = new MarkerOptions();
+    private ArrayList<LatLng> latlngs = new ArrayList<>();
+    private Marker userMarker;
 
     private Switch mswitch;
 
@@ -105,13 +119,13 @@ public class AvailableActivity extends AppCompatActivity
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle("Availabe");
+        getSupportActionBar().setTitle("Available");
 
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-//                .findFragmentById(R.id.tutor_map);
-//        mapFragment.getMapAsync(this);
+         //Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.tutor_map);
+        mapFragment.getMapAsync(this);
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -140,14 +154,62 @@ public class AvailableActivity extends AppCompatActivity
     public void onConnected(@Nullable Bundle bundle) {
         mLastLocation = getLocation(mGoogleApiClient);
 
-//        mMap.setMyLocationEnabled(true);
-//        mMap.setBuildingsEnabled(true);
+        mMap.setMyLocationEnabled(true);
+        mMap.setBuildingsEnabled(true);
         latitude = mLastLocation.getLatitude();
         longitude = mLastLocation.getLongitude();
         currentLocation = new LatLng(latitude, longitude);
+
 //        mMap.addMarker(new MarkerOptions().position(currentLocation));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-//        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+
+        DatabaseReference studentRef = FirebaseDatabase.getInstance().getReference().child("users");
+
+        studentRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                    Map<String, String> map = new HashMap<>();
+                    map = (HashMap) postSnapshot.getValue();
+
+                    userLatitude = Double.valueOf(map.get("latitude"));
+                    userLongitude = Double.valueOf(map.get("longitude"));
+                    Log.d("LATITUDE", "MY LATITUDE IS: "+map.get("latitude"));
+                    userClass = map.get("course");
+
+                    Log.d("CLASS", "onDataChange: "+mClass + "theirClass: "+ userClass);
+
+                    mMap.setOnMarkerClickListener(AvailableActivity.this);
+
+                if (userClass.equals(mClass)) {
+                    userLocation = new LatLng(userLatitude, userLongitude);
+//                    mMap.addMarker(options.position(userLocation));
+                    latlngs.add(userLocation);
+
+                    for (LatLng point : latlngs) {
+                        Log.d("LATLONG", "onDataChange: "+ point);
+                        options.position(point);
+                        mMap.addMarker(options);
+                    }
+
+                    userMarker = mMap.addMarker(options);
+
+                }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
+
+
+        userLocation = new LatLng(userLatitude, userLongitude);
+        mMap.addMarker(new MarkerOptions().position(userLocation));
 
         mswitch = (Switch) findViewById(R.id.availability_switch);
         mswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -161,6 +223,7 @@ public class AvailableActivity extends AppCompatActivity
                     myLongitude = Double.toString(longitude);
 
                     FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
+                    //FirebaseUser student = FirebaseAuth.getInstance().zza();
                     if (tutor != null) {
                         // Name, email address, and profile photo Url
                         name = tutor.getDisplayName();
@@ -252,27 +315,27 @@ public class AvailableActivity extends AppCompatActivity
         });
 
 
-        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
-                Log.i("TAG", "Place: " + place.getName());
-            }
-
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("TAG", "An error occurred: " + status);
-            }
-        });
+//        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
+//                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+//
+//        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+//            @Override
+//            public void onPlaceSelected(Place place) {
+//                // TODO: Get info about the selected place.
+//                Log.i("TAG", "Place: " + place.getName());
+//            }
+//
+//            @Override
+//            public void onError(Status status) {
+//                // TODO: Handle the error.
+//                Log.i("TAG", "An error occurred: " + status);
+//            }
+//        });
 
     }
 
     private void addDrawerItems() {
-        String[] osArray = { "Back to Courses", "Payment", "History", "Tutor with Prep", "Account", "Sign Out"};
+        String[] osArray = { "Back to Courses", "Payment", "History", "Switch to Student", "Account", "Sign Out"};
         drawerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
         mDrawerList.setAdapter(drawerAdapter);
 
@@ -293,7 +356,7 @@ public class AvailableActivity extends AppCompatActivity
                         startActivity(historyIntent);
                         break;
                     case 3:
-                        Intent tutorIntent = new Intent(AvailableActivity.this, TutorActivity.class);
+                        Intent tutorIntent = new Intent(AvailableActivity.this, SubjectsActivity.class);
                         startActivity(tutorIntent);
                         break;
                     case 4:
@@ -381,6 +444,25 @@ public class AvailableActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(AvailableActivity.this);
+                builder.setTitle("Accept this request?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(AvailableActivity.this, "Accepted!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
 
+                    }
+                });
+        builder.show();
+        return false;
+    }
 }

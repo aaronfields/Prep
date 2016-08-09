@@ -17,30 +17,32 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ly.generalassemb.prep.AvailableActivity">
 
-    <!--<fragment xmlns:android="http://schemas.android.com/apk/res/android"-->
-              <!--xmlns:map="http://schemas.android.com/apk/res-auto"-->
-              <!--xmlns:tools="http://schemas.android.com/tools"-->
-              <!--android:id="@+id/tutor_map"-->
-              <!--android:name="com.google.android.gms.maps.SupportMapFragment"-->
-              <!--android:layout_width="match_parent"-->
-              <!--android:layout_height="match_parent"-->
-              <!--android:layout_centerInParent="true"-->
-              <!--tools:context="ly.generalassemb.prep.AvailableActivity">-->
-    <!--</fragment>-->
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:map="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/tutor_map"
+              android:name="com.google.android.gms.maps.SupportMapFragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_centerInParent="true"
+              tools:context="ly.generalassemb.prep.AvailableActivity">
+    </fragment>
 
-    <TextView
-        android:id="@+id/available_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available for tutoring?"
-        android:layout_centerInParent="true"/>
+    <!--<TextView-->
+        <!--android:id="@+id/available_text"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Available for tutoring?"-->
+        <!--android:textStyle="bold"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_centerHorizontal="true"/>-->
 
-    <Switch
-        android:id="@+id/availability_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/available_text"/>
+    <!--<Switch-->
+        <!--android:id="@+id/availability_switch"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:layout_below="@id/available_text"/>-->
 
 
     <!--<ImageView-->
