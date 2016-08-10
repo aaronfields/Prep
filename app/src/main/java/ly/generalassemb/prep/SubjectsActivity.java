@@ -1,9 +1,14 @@
 package ly.generalassemb.prep;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -47,6 +52,8 @@ public class SubjectsActivity extends AppCompatActivity {
     private String mActivityTitle;
 
     private static int RC_SIGN_IN = 7;
+    static final int REQUEST_LOCATION = 0;
+    boolean isConnected;
 
     private String name;
     private String email;
@@ -57,8 +64,21 @@ public class SubjectsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subjects);
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if( user == null) {
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .build(),
+                    RC_SIGN_IN);
+
+        }
+
 //        Intent intent = new Intent(SubjectsActivity.this, MapsActivity.class);
 //        startActivity(intent);
+
+        checkConnection();
+        checkPermissions();
 
         mDrawerList = (ListView) findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -99,11 +119,7 @@ public class SubjectsActivity extends AppCompatActivity {
 
         subjectsRecyclerView.setAdapter(subjectAdapter);
 
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .build(),
-                RC_SIGN_IN);
+
 
     }
 
@@ -255,6 +271,43 @@ public class SubjectsActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                }
+                return;
+            }
+        }
+    }
+
+    public void checkConnection() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            Log.d("SEARCH", "onCreate: You are connected");
+            isConnected = true;
+
+        } else {
+            Log.d("SEARCH", "onCreate: You are not connected");
+            isConnected = false;
+        }
+    }
+
+    public void checkPermissions(){
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
+        }
+
+
     }
 
 }

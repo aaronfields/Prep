@@ -1,5 +1,6 @@
 package ly.generalassemb.prep;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
@@ -8,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -64,6 +66,8 @@ public class MapsActivity extends AppCompatActivity
     private double latitude;
     private double longitude;
     private Location location;
+    private double cameraLatitude;
+    private double cameraLongitude;
 
     private LatLng currentLocation;
     Marker currLocationMarker;
@@ -83,6 +87,9 @@ public class MapsActivity extends AppCompatActivity
     private String UID;
     private String myLatitude;
     private String myLongitude;
+
+    Map<String, String> map;
+    DatabaseReference ref;
 
 
 
@@ -146,8 +153,7 @@ public class MapsActivity extends AppCompatActivity
         longitude = mLastLocation.getLongitude();
         currentLocation = new LatLng(latitude, longitude);
         //mMap.addMarker(new MarkerOptions().position(currentLocation));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
     }
 
     public Location getLocation(GoogleApiClient client) {
@@ -173,9 +179,9 @@ public class MapsActivity extends AppCompatActivity
                 latitude = cameraPosition.target.latitude;
                 longitude = cameraPosition.target.longitude;
 
-                Log.d("centerLat","here: "+cameraPosition.target.latitude);
+                Log.d("centerLat","here: "+latitude);
 
-                Log.d("centerLong","here: "+cameraPosition.target.longitude);
+                Log.d("centerLong","here: "+longitude);
 
                 requestTutor.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -190,16 +196,30 @@ public class MapsActivity extends AppCompatActivity
                             email = user.getEmail();
                             UID = user.getUid();
 
-                            Map<String, String> map = new HashMap<>();
+                            map = new HashMap<>();
                             //map.put("UID", UID);
                             map.put("displayname", name);
                             map.put("email", email);
                             map.put("course", mClass);
                             map.put("latitude", myLatitude);
                             map.put("longitude", myLongitude);
+                            map.put("active", "yes");
 
-                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                            ref = FirebaseDatabase.getInstance().getReference();
                             ref.child("users").child(UID).setValue(map);
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                            builder.setMessage("Searching for Tutor...");
+                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    map.remove("active");
+                                    ref.child("users").child(UID).setValue(map);
+                                    dialogInterface.cancel();
+
+                                }
+                            });
+                            builder.show();
 
                         }
 
@@ -260,7 +280,7 @@ public class MapsActivity extends AppCompatActivity
 
 
     private void addDrawerItems() {
-        String[] osArray = { "Back to Courses", "Payment", "History", "Tutor with Prep", "Account", "Sign Out"};
+        String[] osArray = { "Back to Subjects", "Payment", "History", "Tutor with Prep", "Account", "Sign Out"};
         drawerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
         mDrawerList.setAdapter(drawerAdapter);
 
@@ -269,7 +289,7 @@ public class MapsActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position){
                     case 0:
-                        Intent courseIntent = new Intent(MapsActivity.this, CourseActivity.class);
+                        Intent courseIntent = new Intent(MapsActivity.this, SubjectsActivity.class);
                         startActivity(courseIntent);
                         break;
                     case 1:

@@ -2,11 +2,11 @@ package ly.generalassemb.prep;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +52,10 @@ public class TutorCourseActivity extends AppCompatActivity {
     private String UID;
     private String name;
     private String email;
+    private ArrayList<String> courseList;
+    private String[] courseArray;
+
+    private Button findStudents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +65,18 @@ public class TutorCourseActivity extends AppCompatActivity {
         mDrawerList = (ListView) findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
+        findStudents = (Button) findViewById(R.id.findstudents_button);
+        courseList = new ArrayList<>();
+
+        findStudents.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(TutorCourseActivity.this, AvailableActivity.class);
+                //intent.putExtra("class", model);
+                startActivity(intent);
+
+            }
+        });
 
         addDrawerItems();
         setupDrawer();
@@ -121,9 +139,19 @@ public class TutorCourseActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(TutorCourseActivity.this, AvailableActivity.class);
-                        intent.putExtra("class", model);
-                        startActivity(intent);
+//                        Intent intent = new Intent(TutorCourseActivity.this, AvailableActivity.class);
+//                        intent.putExtra("class", model);
+//                        startActivity(intent);
+
+
+
+                        courseList.add(model);
+                        Toast.makeText(TutorCourseActivity.this, model + " added", Toast.LENGTH_SHORT).show();
+//                        courseArray = new String[courseList.size()];
+//                        courseArray = model.split("|");
+//                        courseArray = courseList.toArray(courseArray);
+
+                        //courseList = model.split("|");
 
                         FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
                         if (tutor != null) {
@@ -136,10 +164,14 @@ public class TutorCourseActivity extends AppCompatActivity {
                             //map.put("UID", UID);
                             map.put("displayname", name);
                             map.put("email", email);
-                            map.put("courses", model);
+                            //map.put("courses", model);
+
+//                            Map<String, ArrayList<String>> courseMap = new HashMap<String, ArrayList<String>>();
+//                            courseMap.put("courses", courseList);
 
                             DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
                             ref.child("tutors").child(UID).setValue(map);
+                            ref.child("tutors").child(UID).child("courses").setValue(courseList);
 
                         }
 

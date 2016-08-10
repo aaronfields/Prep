@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -39,7 +38,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -80,6 +78,7 @@ public class AvailableActivity extends AppCompatActivity
 
     private LatLng currentLocation;
     Marker currLocationMarker;
+    Marker studentMarker;
 
     private ListView mDrawerList;
     private DrawerLayout mDrawerLayout;
@@ -88,6 +87,8 @@ public class AvailableActivity extends AppCompatActivity
     private String mActivityTitle;
     private String mClass;
     private String userClass;
+    private String userName;
+    private String userActive;
 
     private ImageView pinButton;
     private LatLng myLatLng;
@@ -101,14 +102,23 @@ public class AvailableActivity extends AppCompatActivity
     private Marker userMarker;
 
     private Switch mswitch;
+    private String tutorCourse;
+    private ArrayList<String> tCourse;
+    private DataSnapshot snapshot;
+    Map<String, String> map;
+    private DatabaseReference studentRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_available);
 
-        Intent intent = getIntent();
-        mClass = intent.getStringExtra("class");
+//        Intent intent = getIntent();
+//        mClass = intent.getStringExtra("class");
+
+        tCourse = new ArrayList<>();
+
+
 
 
         mDrawerList = (ListView)findViewById(R.id.navList);mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
@@ -150,6 +160,10 @@ public class AvailableActivity extends AppCompatActivity
         mGoogleApiClient.disconnect();
     }
 
+    public AvailableActivity() {
+        super();
+    }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLastLocation = getLocation(mGoogleApiClient);
@@ -161,49 +175,91 @@ public class AvailableActivity extends AppCompatActivity
         currentLocation = new LatLng(latitude, longitude);
 
 //        mMap.addMarker(new MarkerOptions().position(currentLocation));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
 
-        DatabaseReference studentRef = FirebaseDatabase.getInstance().getReference().child("users");
 
-        studentRef.addValueEventListener(new ValueEventListener() {
+        UID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Log.d("UID", "onConnected: " +UID);
+        DatabaseReference tutorRef = FirebaseDatabase.getInstance().getReference().child("tutors").child(UID).child("courses");
+
+        tutorRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-                    Map<String, String> map = new HashMap<>();
-                    map = (HashMap) postSnapshot.getValue();
+                Log.d("TUTORS", "COURSES: ");
+                    tCourse = (ArrayList<String>) snapshot.getValue();
+                    //Map<String, String> tutorMap = new HashMap<>();
+                    //tutorMap = (HashMap) postSnapshot.getValue();
+//                for(String course : tCourse){
+//                    mClass = course;
+//                    Log.d("MCLASS", "onDataChange: " + mClass);
+//                }
 
-                    userLatitude = Double.valueOf(map.get("latitude"));
-                    userLongitude = Double.valueOf(map.get("longitude"));
-                    Log.d("LATITUDE", "MY LATITUDE IS: "+map.get("latitude"));
-                    userClass = map.get("course");
 
-                    Log.d("CLASS", "onDataChange: "+mClass + "theirClass: "+ userClass);
 
-                    mMap.setOnMarkerClickListener(AvailableActivity.this);
-
-                if (userClass.equals(mClass)) {
-                    userLocation = new LatLng(userLatitude, userLongitude);
-//                    mMap.addMarker(options.position(userLocation));
-                    latlngs.add(userLocation);
-
-                    for (LatLng point : latlngs) {
-                        Log.d("LATLONG", "onDataChange: "+ point);
-                        options.position(point);
-                        mMap.addMarker(options);
-                    }
-
-                    userMarker = mMap.addMarker(options);
-
-                }
-                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
+        });
 
+        studentRef = FirebaseDatabase.getInstance().getReference().child("users");
+
+        studentRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                    map = new HashMap<>();
+                    map = (HashMap) postSnapshot.getValue();
+                    userClass = map.get("course");
+                    Log.d("AM I ACTIVE", "onDataChange: " + userClass);
+                    userName = map.get("displayname");
+                    userActive = map.get("active");
+                    Log.d("AM I ACTIVE", "onDataChange: " + userActive);
+
+                    for(String course : tCourse) {
+                        mClass = course;
+                        Log.d("MCLASS", "onDataChange: " + mClass);
+
+
+                        if (mClass.equals(userClass)) {
+
+                            userLatitude = Double.valueOf(map.get("latitude"));
+                            userLongitude = Double.valueOf(map.get("longitude"));
+                            Log.d("LATITUDE", "MY LATITUDE IS: " + map.get("latitude"));
+                            userClass = map.get("course");
+
+                            Log.d("CLASS", "onDataChange: " + mClass + "theirClass: " + userClass);
+
+                            mMap.setOnMarkerClickListener(AvailableActivity.this);
+
+                            //if (userClass.equals(mClass)) {
+                            userLocation = new LatLng(userLatitude, userLongitude);
+//                    mMap.addMarker(options.position(userLocation));
+                            latlngs.add(userLocation);
+
+                            for (LatLng point : latlngs) {
+                                Log.d("LATLONG", "onDataChange: " + point);
+                                options.position(point);
+                                mMap.addMarker(options).setTitle(userClass);
+//                                studentMarker = mMap.addMarker(options);
+//                                studentMarker.setSnippet(userClass);
+                            }
+
+//                            userMarker = mMap.addMarker(options);
+//                            userMarker.setSnippet(userClass);
+
+
+                        }
+                    }
+                    }
+                }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
         });
 
 
@@ -211,66 +267,66 @@ public class AvailableActivity extends AppCompatActivity
         userLocation = new LatLng(userLatitude, userLongitude);
         mMap.addMarker(new MarkerOptions().position(userLocation));
 
-        mswitch = (Switch) findViewById(R.id.availability_switch);
-        mswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // The toggle is enabled
-                    availability = "yes";
-
-                    myLatLng = new LatLng(latitude, longitude);
-                    myLatitude = Double.toString(latitude);
-                    myLongitude = Double.toString(longitude);
-
-                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
-                    //FirebaseUser student = FirebaseAuth.getInstance().zza();
-                    if (tutor != null) {
-                        // Name, email address, and profile photo Url
-                        name = tutor.getDisplayName();
-                        email = tutor.getEmail();
-                        UID = tutor.getUid();
-
-                        Map<String, String> map = new HashMap<>();
-                        //map.put("UID", UID);
-                        map.put("displayname", name);
-                        map.put("email", email);
-                        map.put("available", availability);
-                        map.put("courses", mClass);
-                        map.put("latitude", myLatitude);
-                        map.put("longitude", myLongitude);
-
-                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-                        ref.child("tutors").child(UID).setValue(map);
-
-                    }
-                } else {
-                    // The toggle is disabled
-
-                    availability = "no";
-
-                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
-                    if (tutor != null) {
-                        // Name, email address, and profile photo Url
-                        name = tutor.getDisplayName();
-                        email = tutor.getEmail();
-                        UID = tutor.getUid();
-
-                        Map<String, String> map = new HashMap<>();
-                        //map.put("UID", UID);
-                        map.put("displayname", name);
-                        map.put("email", email);
-                        map.put("available", availability);
-                        map.put("courses", mClass);
-
-
-                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-                        ref.child("tutors").child(UID).setValue(map);
-
-                    }
-                }
-            }
-
-        });
+//        mswitch = (Switch) findViewById(R.id.availability_switch);
+//        mswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) {
+//                    // The toggle is enabled
+//                    availability = "yes";
+//
+//                    myLatLng = new LatLng(latitude, longitude);
+//                    myLatitude = Double.toString(latitude);
+//                    myLongitude = Double.toString(longitude);
+//
+//                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
+//                    //FirebaseUser student = FirebaseAuth.getInstance().zza();
+//                    if (tutor != null) {
+//                        // Name, email address, and profile photo Url
+//                        name = tutor.getDisplayName();
+//                        email = tutor.getEmail();
+//                        UID = tutor.getUid();
+//
+//                        Map<String, String> map = new HashMap<>();
+//                        //map.put("UID", UID);
+//                        map.put("displayname", name);
+//                        map.put("email", email);
+//                        map.put("available", availability);
+//                        map.put("courses", mClass);
+//                        map.put("latitude", myLatitude);
+//                        map.put("longitude", myLongitude);
+//
+//                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+//                        ref.child("tutors").child(UID).setValue(map);
+//
+//                    }
+//                } else {
+//                    // The toggle is disabled
+//
+//                    availability = "no";
+//
+//                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
+//                    if (tutor != null) {
+//                        // Name, email address, and profile photo Url
+//                        name = tutor.getDisplayName();
+//                        email = tutor.getEmail();
+//                        UID = tutor.getUid();
+//
+//                        Map<String, String> map = new HashMap<>();
+//                        //map.put("UID", UID);
+//                        map.put("displayname", name);
+//                        map.put("email", email);
+//                        map.put("available", availability);
+//                        map.put("courses", mClass);
+//
+//
+//                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+//                        ref.child("tutors").child(UID).setValue(map);
+//
+//                    }
+//                }
+//            }
+//
+//        });
 
     }
 
@@ -447,12 +503,20 @@ public class AvailableActivity extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker) {
 
+
+
         AlertDialog.Builder builder = new AlertDialog.Builder(AvailableActivity.this);
-                builder.setTitle("Accept this request?");
+                builder.setTitle(userClass);
+                builder.setMessage("Accept this request?");
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Toast.makeText(AvailableActivity.this, "Accepted!", Toast.LENGTH_SHORT).show();
+
+                        map.put("tutorMatched", "yes");
+                        studentRef = FirebaseDatabase.getInstance().getReference().child("users");
+                        studentRef.child(UID).setValue(map);
+
                     }
                 });
                 builder.setNegativeButton("No", new DialogInterface.OnClickListener() {

@@ -57,6 +57,15 @@ public class TutorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tutor);
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if( user == null) {
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .build(),
+                    RC_SIGN_IN);
+        }
+
         mDrawerList = (ListView) findViewById(R.id.navList);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
@@ -96,11 +105,7 @@ public class TutorActivity extends AppCompatActivity {
 
         subjectsRecyclerView.setAdapter(subjectAdapter);
 
-//        startActivityForResult(
-//                AuthUI.getInstance()
-//                        .createSignInIntentBuilder()
-//                        .build(),
-//                RC_SIGN_IN);
+
 
     }
 
