@@ -150,7 +150,8 @@ public class MapsActivity extends AppCompatActivity
                 //String sessionID = (String) dataSnapshot.getValue();
                 if (dataSnapshot.hasChild("sessionID")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
-                    builder.setTitle("A tutor is on the way!");
+                    builder.setTitle("Prep");
+                    builder.setMessage("A tutor is on the way!");
                     builder.show();
                     //builder.setMessage("Accept this request?");
                 }

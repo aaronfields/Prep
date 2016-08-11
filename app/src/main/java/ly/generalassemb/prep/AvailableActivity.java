@@ -405,7 +405,7 @@ public class AvailableActivity extends AppCompatActivity
     }
 
     private void addDrawerItems() {
-        String[] osArray = { "Back to Courses", "Payment", "History", "Switch to Student", "Account", "Sign Out"};
+        String[] osArray = { "Back to Subjects", "Payment", "History", "Switch to Student", "Account", "Sign Out"};
         drawerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
         mDrawerList.setAdapter(drawerAdapter);
 
@@ -414,7 +414,7 @@ public class AvailableActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position){
                     case 0:
-                        Intent courseIntent = new Intent(AvailableActivity.this, CourseActivity.class);
+                        Intent courseIntent = new Intent(AvailableActivity.this, TutorActivity.class);
                         startActivity(courseIntent);
                         break;
                     case 1:
@@ -547,7 +547,8 @@ public class AvailableActivity extends AppCompatActivity
                         studentRef.child(studentID).setValue(map);
 
                         AlertDialog.Builder myBuilder = new AlertDialog.Builder(AvailableActivity.this);
-                        myBuilder.setTitle(map.get("displayname") + " is located at " + address);
+                        myBuilder.setTitle("Prep");
+                        myBuilder.setMessage(map.get("displayname") + " is located at " + address);
                         myBuilder.show();
 
 
