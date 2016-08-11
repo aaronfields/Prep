@@ -127,8 +127,8 @@ public class TutorActivity extends AppCompatActivity {
 
                 Map<String, String> map = new HashMap<>();
                 //map.put("UID", UID);
-                map.put("displayname", name);
-                map.put("email", email);
+                map.put("tutorname", name);
+                map.put("tutoremail", email);
 
                 DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
                 ref.child("tutors").child(UID).setValue(map);

@@ -3,6 +3,8 @@ package ly.generalassemb.prep;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -44,8 +46,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class AvailableActivity extends AppCompatActivity
@@ -107,6 +112,11 @@ public class AvailableActivity extends AppCompatActivity
     private DataSnapshot snapshot;
     Map<String, String> map;
     private DatabaseReference studentRef;
+    private DatabaseReference sessionsRef;
+    private DatabaseReference tutorRef;
+    private Geocoder geocoder;
+    private String address;
+    private List<Address> addresses;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,8 +127,12 @@ public class AvailableActivity extends AppCompatActivity
 //        mClass = intent.getStringExtra("class");
 
         tCourse = new ArrayList<>();
-
-
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            addresses  = geocoder.getFromLocation(latitude,longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         mDrawerList = (ListView)findViewById(R.id.navList);mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
@@ -180,7 +194,7 @@ public class AvailableActivity extends AppCompatActivity
 
         UID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d("UID", "onConnected: " +UID);
-        DatabaseReference tutorRef = FirebaseDatabase.getInstance().getReference().child("tutors").child(UID).child("courses");
+        tutorRef = FirebaseDatabase.getInstance().getReference().child("tutors").child(UID).child("courses");
 
         tutorRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -503,7 +517,13 @@ public class AvailableActivity extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker) {
 
+        try {
+            addresses  = geocoder.getFromLocation(userLatitude,userLongitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        address = addresses.get(0).getAddressLine(0);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(AvailableActivity.this);
                 builder.setTitle(userClass);
@@ -514,8 +534,44 @@ public class AvailableActivity extends AppCompatActivity
                         Toast.makeText(AvailableActivity.this, "Accepted!", Toast.LENGTH_SHORT).show();
 
                         map.put("tutorMatched", "yes");
+                        map.put("sessionID", UID);
                         studentRef = FirebaseDatabase.getInstance().getReference().child("users");
-                        studentRef.child(UID).setValue(map);
+                        String studentID = map.get("UID");
+
+                        //ref.child("tutors").child(UID).setValue(map);
+
+                        sessionsRef = FirebaseDatabase.getInstance().getReference().child("sessions");
+
+
+                        sessionsRef.child(UID).setValue(map);
+                        studentRef.child(studentID).setValue(map);
+
+                        AlertDialog.Builder myBuilder = new AlertDialog.Builder(AvailableActivity.this);
+                        myBuilder.setTitle(map.get("displayname") + " is located at " + address);
+                        myBuilder.show();
+
+
+
+
+//                        Intent intent = new Intent(AvailableActivity.this, TutorSessionActivity.class);
+//                        startActivity(intent);
+//
+//                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//                        if (user != null) {
+//                            // Name, email address, and profile photo Url
+//                            name = user.getDisplayName();
+//                            email = user.getEmail();
+//                            UID = user.getUid();
+//
+//                            Map<String, String> tutorMap = new HashMap<>();
+//                            //map.put("UID", UID);
+//                            tutorMap.put("displayname", name);
+//                            tutorMap.put("email", email);
+//
+//                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+////                            ref.child("users").child(UID).setValue(map);
+//
+//                        }
 
                     }
                 });

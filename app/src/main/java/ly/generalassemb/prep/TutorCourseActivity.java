@@ -54,6 +54,9 @@ public class TutorCourseActivity extends AppCompatActivity {
     private String email;
     private ArrayList<String> courseList;
     private String[] courseArray;
+    Map<String, String> map;
+    DatabaseReference ref;
+    private DatabaseReference sessionsRef;
 
     private Button findStudents;
 
@@ -74,6 +77,14 @@ public class TutorCourseActivity extends AppCompatActivity {
                 Intent intent = new Intent(TutorCourseActivity.this, AvailableActivity.class);
                 //intent.putExtra("class", model);
                 startActivity(intent);
+
+                //map.put("tutorMatched", "yes");
+//                        studentRef = FirebaseDatabase.getInstance().getReference().child("users");
+//                        studentRef.child(UID).setValue(map);
+
+                sessionsRef = FirebaseDatabase.getInstance().getReference().child("sessions");
+                sessionsRef.child(UID).setValue(map);
+
 
             }
         });
@@ -160,16 +171,16 @@ public class TutorCourseActivity extends AppCompatActivity {
                             email = tutor.getEmail();
                             UID = tutor.getUid();
 
-                            Map<String, String> map = new HashMap<>();
+                            map = new HashMap<>();
                             //map.put("UID", UID);
-                            map.put("displayname", name);
-                            map.put("email", email);
+                            map.put("tutorname", name);
+                            map.put("tutoremail", email);
                             //map.put("courses", model);
 
 //                            Map<String, ArrayList<String>> courseMap = new HashMap<String, ArrayList<String>>();
 //                            courseMap.put("courses", courseList);
 
-                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                            ref = FirebaseDatabase.getInstance().getReference();
                             ref.child("tutors").child(UID).setValue(map);
                             ref.child("tutors").child(UID).child("courses").setValue(courseList);
 

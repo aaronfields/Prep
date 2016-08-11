@@ -42,9 +42,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -87,6 +91,7 @@ public class MapsActivity extends AppCompatActivity
     private String UID;
     private String myLatitude;
     private String myLongitude;
+    private Key sessionID;
 
     Map<String, String> map;
     DatabaseReference ref;
@@ -128,7 +133,42 @@ public class MapsActivity extends AppCompatActivity
                     .build();
         }
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            name = user.getDisplayName();
+            email = user.getEmail();
+            UID = user.getUid();
+        }
+
+        ref = FirebaseDatabase.getInstance().getReference().child("users");
+
+    if(ref.child(UID)!=null) {
+
+        ref.child(UID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //String sessionID = (String) dataSnapshot.getValue();
+                if (dataSnapshot.hasChild("sessionID")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                    builder.setTitle("A tutor is on the way!");
+                    builder.show();
+                    //builder.setMessage("Accept this request?");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+            // Retrieve new posts as they are added to the database
+
+        });
     }
+
+    }
+
+
 
     protected void onStart() {
 
@@ -197,7 +237,7 @@ public class MapsActivity extends AppCompatActivity
                             UID = user.getUid();
 
                             map = new HashMap<>();
-                            //map.put("UID", UID);
+                            map.put("UID", UID);
                             map.put("displayname", name);
                             map.put("email", email);
                             map.put("course", mClass);
@@ -205,8 +245,8 @@ public class MapsActivity extends AppCompatActivity
                             map.put("longitude", myLongitude);
                             map.put("active", "yes");
 
-                            ref = FirebaseDatabase.getInstance().getReference();
-                            ref.child("users").child(UID).setValue(map);
+                            ref = FirebaseDatabase.getInstance().getReference().child("users");
+                            ref.child(UID).setValue(map);
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
                             builder.setMessage("Searching for Tutor...");
@@ -264,6 +304,7 @@ public class MapsActivity extends AppCompatActivity
 
 
     }
+
 
 
 

@@ -74,7 +74,7 @@ public class SubjectsActivity extends AppCompatActivity {
 
         }
 
-//        Intent intent = new Intent(SubjectsActivity.this, MapsActivity.class);
+//        Intent intent = new Intent(SubjectsActivity.this, TutorSessionActivity.class);
 //        startActivity(intent);
 
         checkConnection();
