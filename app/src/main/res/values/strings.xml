@@ -17,7 +17,7 @@
     </string>
     <string name="title_activity_registration">Register</string>
     <string name="title_activity_payment">Payment</string>
-    <string name="title_activity_subjects">Subjects</string>
+    <string name="title_activity_subjects">Prep</string>
     <string name="title_activity_courses">Courses</string>
     <string name="error_invalid_phonenumber">This phone number is invalid</string>
     <string name="error_invalid_creditcard">This credit card number is invalid</string>
