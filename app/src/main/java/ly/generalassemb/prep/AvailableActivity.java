@@ -432,7 +432,7 @@ public class AvailableActivity extends AppCompatActivity
                         AlertDialog.Builder myBuilder = new AlertDialog.Builder(AvailableActivity.this);
                         myBuilder.setTitle("Prep");
                         myBuilder.setMessage(map.get("displayname") + " is located at " + address
-                                + ". Their phone number is: " + userPhone + ".");
+                                + ". Phone number: " + userPhone + ".");
                         myBuilder.show();
 
                     }
