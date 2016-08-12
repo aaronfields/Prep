@@ -28,37 +28,6 @@
               tools:context="ly.generalassemb.prep.AvailableActivity">
     </fragment>
 
-    <!--<TextView-->
-        <!--android:id="@+id/available_text"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Available for tutoring?"-->
-        <!--android:textStyle="bold"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_centerHorizontal="true"/>-->
-
-    <!--<Switch-->
-        <!--android:id="@+id/availability_switch"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:layout_below="@id/available_text"/>-->
-
-
-    <!--<ImageView-->
-        <!--android:id="@+id/imageMarker"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--android:src="@mipmap/add_marker" />-->
-
-    <!--<fragment-->
-        <!--android:id="@+id/place_autocomplete_fragment"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"-->
-        <!--/>-->
-
 </RelativeLayout>
 
 
@@ -67,7 +36,7 @@
     android:layout_width="200dp"
     android:layout_height="match_parent"
     android:layout_gravity="left|start"
-    android:background="#ffeeeeee"/>
+    android:background="@color/colorPrimaryDark"/>
 
 </android.support.v4.widget.DrawerLayout>
 

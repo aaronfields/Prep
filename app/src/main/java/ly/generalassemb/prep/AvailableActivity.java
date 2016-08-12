@@ -146,7 +146,6 @@ public class AvailableActivity extends AppCompatActivity
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle("Prep");
 
-
          //Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.tutor_map);
@@ -159,8 +158,6 @@ public class AvailableActivity extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
-
-
     }
 
     protected void onStart() {
@@ -189,7 +186,6 @@ public class AvailableActivity extends AppCompatActivity
         longitude = mLastLocation.getLongitude();
         currentLocation = new LatLng(latitude, longitude);
 
-//        mMap.addMarker(new MarkerOptions().position(currentLocation));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
 
 
@@ -202,14 +198,6 @@ public class AvailableActivity extends AppCompatActivity
             public void onDataChange(DataSnapshot snapshot) {
                 Log.d("TUTORS", "COURSES: ");
                     tCourse = (ArrayList<String>) snapshot.getValue();
-                    //Map<String, String> tutorMap = new HashMap<>();
-                    //tutorMap = (HashMap) postSnapshot.getValue();
-//                for(String course : tCourse){
-//                    mClass = course;
-//                    Log.d("MCLASS", "onDataChange: " + mClass);
-//                }
-
-
 
             }
 
@@ -250,23 +238,15 @@ public class AvailableActivity extends AppCompatActivity
 
                             mMap.setOnMarkerClickListener(AvailableActivity.this);
 
-                            //if (userClass.equals(mClass)) {
+
                             userLocation = new LatLng(userLatitude, userLongitude);
-//                    mMap.addMarker(options.position(userLocation));
                             latlngs.add(userLocation);
 
                             for (LatLng point : latlngs) {
                                 Log.d("LATLONG", "onDataChange: " + point);
                                 options.position(point);
                                 mMap.addMarker(options).setTitle(userClass);
-//                                studentMarker = mMap.addMarker(options);
-//                                studentMarker.setSnippet(userClass);
                             }
-
-//                            userMarker = mMap.addMarker(options);
-//                            userMarker.setSnippet(userClass);
-
-
                         }
                     }
                     }
@@ -278,11 +258,8 @@ public class AvailableActivity extends AppCompatActivity
             }
         });
 
-
-
         userLocation = new LatLng(userLatitude, userLongitude);
         mMap.addMarker(new MarkerOptions().position(userLocation));
-
 
     }
 
@@ -322,27 +299,8 @@ public class AvailableActivity extends AppCompatActivity
                 Log.d("centerLat","here: "+cameraPosition.target.latitude);
 
                 Log.d("centerLong","here: "+cameraPosition.target.longitude);
-
             }
         });
-
-
-//        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
-//                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-//
-//        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-//            @Override
-//            public void onPlaceSelected(Place place) {
-//                // TODO: Get info about the selected place.
-//                Log.i("TAG", "Place: " + place.getName());
-//            }
-//
-//            @Override
-//            public void onError(Status status) {
-//                // TODO: Handle the error.
-//                Log.i("TAG", "An error occurred: " + status);
-//            }
-//        });
 
     }
 
@@ -387,7 +345,6 @@ public class AvailableActivity extends AppCompatActivity
                                     }
                                 });
                         break;
-
                 }
             }
         });
@@ -399,8 +356,7 @@ public class AvailableActivity extends AppCompatActivity
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                //getSupportActionBar().setTitle("Navigation!");
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu();
             }
 
             /** Called when a drawer has settled in a completely closed state. */
@@ -428,18 +384,8 @@ public class AvailableActivity extends AppCompatActivity
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.drawer, menu);
-//        return true;
-//    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -454,7 +400,6 @@ public class AvailableActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -480,10 +425,7 @@ public class AvailableActivity extends AppCompatActivity
                         studentRef = FirebaseDatabase.getInstance().getReference().child("users");
                         String studentID = map.get("UID");
 
-                        //ref.child("tutors").child(UID).setValue(map);
-
                         sessionsRef = FirebaseDatabase.getInstance().getReference().child("sessions");
-
 
                         sessionsRef.child(UID).setValue(map);
                         studentRef.child(studentID).setValue(map);

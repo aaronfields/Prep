@@ -75,16 +75,10 @@ public class TutorCourseActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(TutorCourseActivity.this, AvailableActivity.class);
-                //intent.putExtra("class", model);
                 startActivity(intent);
-
-                //map.put("tutorMatched", "yes");
-//                        studentRef = FirebaseDatabase.getInstance().getReference().child("users");
-//                        studentRef.child(UID).setValue(map);
 
                 sessionsRef = FirebaseDatabase.getInstance().getReference().child("sessions");
                 sessionsRef.child(UID).setValue(map);
-
 
             }
         });
@@ -150,19 +144,9 @@ public class TutorCourseActivity extends AppCompatActivity {
                 viewHolder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-//                        Intent intent = new Intent(TutorCourseActivity.this, AvailableActivity.class);
-//                        intent.putExtra("class", model);
-//                        startActivity(intent);
-
-
 
                         courseList.add(model);
                         Toast.makeText(TutorCourseActivity.this, model + " added", Toast.LENGTH_SHORT).show();
-//                        courseArray = new String[courseList.size()];
-//                        courseArray = model.split("|");
-//                        courseArray = courseList.toArray(courseArray);
-
-                        //courseList = model.split("|");
 
                         FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
                         if (tutor != null) {
@@ -175,10 +159,6 @@ public class TutorCourseActivity extends AppCompatActivity {
                             //map.put("UID", UID);
                             map.put("tutorname", name);
                             map.put("tutoremail", email);
-                            //map.put("courses", model);
-
-//                            Map<String, ArrayList<String>> courseMap = new HashMap<String, ArrayList<String>>();
-//                            courseMap.put("courses", courseList);
 
                             ref = FirebaseDatabase.getInstance().getReference();
                             ref.child("tutors").child(UID).setValue(map);
@@ -196,8 +176,6 @@ public class TutorCourseActivity extends AppCompatActivity {
 
     }
 
-
-
     public static class CourseViewHolder extends RecyclerView.ViewHolder{
         TextView courseName;
         View mView;
@@ -211,8 +189,6 @@ public class TutorCourseActivity extends AppCompatActivity {
         }
 
     }
-
-
     private void addDrawerItems() {
         final String[] osArray = {"Back to Subjects","Payment", "History", "Tutor with Prep", "Account", "Sign Out"};
         drawerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
@@ -295,21 +271,10 @@ public class TutorCourseActivity extends AppCompatActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.drawer, menu);
-//        return true;
-//    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
