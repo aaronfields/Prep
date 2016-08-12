@@ -117,6 +117,7 @@ public class AvailableActivity extends AppCompatActivity
     private Geocoder geocoder;
     private String address;
     private List<Address> addresses;
+    private String userPhone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +144,7 @@ public class AvailableActivity extends AppCompatActivity
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle("Available");
+        getSupportActionBar().setTitle("Prep");
 
 
          //Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -243,6 +244,7 @@ public class AvailableActivity extends AppCompatActivity
                             userLongitude = Double.valueOf(map.get("longitude"));
                             Log.d("LATITUDE", "MY LATITUDE IS: " + map.get("latitude"));
                             userClass = map.get("course");
+                            userPhone = map.get("phonenumber");
 
                             Log.d("CLASS", "onDataChange: " + mClass + "theirClass: " + userClass);
 
@@ -281,66 +283,6 @@ public class AvailableActivity extends AppCompatActivity
         userLocation = new LatLng(userLatitude, userLongitude);
         mMap.addMarker(new MarkerOptions().position(userLocation));
 
-//        mswitch = (Switch) findViewById(R.id.availability_switch);
-//        mswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked) {
-//                    // The toggle is enabled
-//                    availability = "yes";
-//
-//                    myLatLng = new LatLng(latitude, longitude);
-//                    myLatitude = Double.toString(latitude);
-//                    myLongitude = Double.toString(longitude);
-//
-//                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
-//                    //FirebaseUser student = FirebaseAuth.getInstance().zza();
-//                    if (tutor != null) {
-//                        // Name, email address, and profile photo Url
-//                        name = tutor.getDisplayName();
-//                        email = tutor.getEmail();
-//                        UID = tutor.getUid();
-//
-//                        Map<String, String> map = new HashMap<>();
-//                        //map.put("UID", UID);
-//                        map.put("displayname", name);
-//                        map.put("email", email);
-//                        map.put("available", availability);
-//                        map.put("courses", mClass);
-//                        map.put("latitude", myLatitude);
-//                        map.put("longitude", myLongitude);
-//
-//                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-//                        ref.child("tutors").child(UID).setValue(map);
-//
-//                    }
-//                } else {
-//                    // The toggle is disabled
-//
-//                    availability = "no";
-//
-//                    FirebaseUser tutor = FirebaseAuth.getInstance().getCurrentUser();
-//                    if (tutor != null) {
-//                        // Name, email address, and profile photo Url
-//                        name = tutor.getDisplayName();
-//                        email = tutor.getEmail();
-//                        UID = tutor.getUid();
-//
-//                        Map<String, String> map = new HashMap<>();
-//                        //map.put("UID", UID);
-//                        map.put("displayname", name);
-//                        map.put("email", email);
-//                        map.put("available", availability);
-//                        map.put("courses", mClass);
-//
-//
-//                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-//                        ref.child("tutors").child(UID).setValue(map);
-//
-//                    }
-//                }
-//            }
-//
-//        });
 
     }
 
@@ -548,31 +490,9 @@ public class AvailableActivity extends AppCompatActivity
 
                         AlertDialog.Builder myBuilder = new AlertDialog.Builder(AvailableActivity.this);
                         myBuilder.setTitle("Prep");
-                        myBuilder.setMessage(map.get("displayname") + " is located at " + address);
+                        myBuilder.setMessage(map.get("displayname") + " is located at " + address
+                                + ". Their phone number is: " + userPhone + ".");
                         myBuilder.show();
-
-
-
-
-//                        Intent intent = new Intent(AvailableActivity.this, TutorSessionActivity.class);
-//                        startActivity(intent);
-//
-//                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//                        if (user != null) {
-//                            // Name, email address, and profile photo Url
-//                            name = user.getDisplayName();
-//                            email = user.getEmail();
-//                            UID = user.getUid();
-//
-//                            Map<String, String> tutorMap = new HashMap<>();
-//                            //map.put("UID", UID);
-//                            tutorMap.put("displayname", name);
-//                            tutorMap.put("email", email);
-//
-//                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-////                            ref.child("users").child(UID).setValue(map);
-//
-//                        }
 
                     }
                 });

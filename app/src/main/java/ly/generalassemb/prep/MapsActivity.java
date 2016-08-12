@@ -11,12 +11,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,12 +27,9 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -95,6 +94,8 @@ public class MapsActivity extends AppCompatActivity
 
     Map<String, String> map;
     DatabaseReference ref;
+    EditText input;
+    String phoneNumber;
 
 
 
@@ -102,6 +103,20 @@ public class MapsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        builder.setTitle("Prep");
+        builder.setMessage("What phone number should we give your tutor?");
+        input = new EditText(MapsActivity.this);
+        input.setInputType(InputType.TYPE_CLASS_PHONE);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                phoneNumber = input.getText().toString();
+            }
+        });
+        builder.show();
 
         pinButton = (ImageView) findViewById(R.id.imageMarker);
         requestTutor = (Button) findViewById(R.id.request_button);
@@ -130,6 +145,9 @@ public class MapsActivity extends AppCompatActivity
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .enableAutoManage(this, this)
                     .build();
         }
 
@@ -168,9 +186,6 @@ public class MapsActivity extends AppCompatActivity
     }
 
     }
-
-
-
     protected void onStart() {
 
         super.onStart();
@@ -193,7 +208,6 @@ public class MapsActivity extends AppCompatActivity
         latitude = mLastLocation.getLatitude();
         longitude = mLastLocation.getLongitude();
         currentLocation = new LatLng(latitude, longitude);
-        //mMap.addMarker(new MarkerOptions().position(currentLocation));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
     }
 
@@ -241,15 +255,18 @@ public class MapsActivity extends AppCompatActivity
                             map.put("UID", UID);
                             map.put("displayname", name);
                             map.put("email", email);
+                            map.put("phonenumber", phoneNumber);
                             map.put("course", mClass);
                             map.put("latitude", myLatitude);
                             map.put("longitude", myLongitude);
                             map.put("active", "yes");
 
+
                             ref = FirebaseDatabase.getInstance().getReference().child("users");
                             ref.child(UID).setValue(map);
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                            builder.setTitle("Prep");
                             builder.setMessage("Searching for Tutor...");
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 @Override
@@ -270,45 +287,7 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-
-
-
-
-        //mLastLocation = getLocation(mGoogleApiClient);
-
-
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
-        //Log.d("MAPLATLONG", "lat: " + mLastLocation.getLatitude() + " long: "+ mLastLocation.getLatitude());
-
-
-        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
-                Log.i("TAG", "Place: " + place.getName());
-            }
-
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("TAG", "An error occurred: " + status);
-            }
-        });
-
-
-
     }
-
-
-
-
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -403,26 +382,14 @@ public class MapsActivity extends AppCompatActivity
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.drawer, menu);
-//        return true;
-//    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
 
-        // Activate the navigation drawer toggle
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }

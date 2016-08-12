@@ -149,10 +149,7 @@ public class SubjectsActivity extends AppCompatActivity {
 
             }
         }
-
-
     }
-
 
         public static class SubjectViewHolder extends RecyclerView.ViewHolder {
             TextView subjectName;
@@ -246,12 +243,6 @@ public class SubjectsActivity extends AppCompatActivity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.drawer, menu);
-//        return true;
-//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -1,6 +1,5 @@
 package ly.generalassemb.prep;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -27,12 +26,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        if(view == mSignIn) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivity(loginIntent);
-        } else {
-            Intent registerIntent = new Intent(this, RegistrationActivity.class);
-            startActivity(registerIntent);
-        }
+
     }
 }
