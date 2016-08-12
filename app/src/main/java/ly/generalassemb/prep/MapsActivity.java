@@ -3,6 +3,7 @@ package ly.generalassemb.prep;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -108,6 +109,7 @@ public class MapsActivity extends AppCompatActivity
         builder.setTitle("Prep");
         builder.setMessage("What phone number should we give your tutor?");
         input = new EditText(MapsActivity.this);
+        input.setTextColor(Color.parseColor("#000000"));;
         input.setInputType(InputType.TYPE_CLASS_PHONE);
         builder.setView(input);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
