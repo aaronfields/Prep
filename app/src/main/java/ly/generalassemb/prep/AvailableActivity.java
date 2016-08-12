@@ -225,7 +225,6 @@ public class AvailableActivity extends AppCompatActivity
                         mClass = course;
                         Log.d("MCLASS", "onDataChange: " + mClass);
 
-
                         if (mClass.equals(userClass)) {
 
                             userLatitude = Double.valueOf(map.get("latitude"));

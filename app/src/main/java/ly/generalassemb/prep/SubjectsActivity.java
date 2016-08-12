@@ -71,9 +71,7 @@ public class SubjectsActivity extends AppCompatActivity {
                             .createSignInIntentBuilder()
                             .build(),
                     RC_SIGN_IN);
-
         }
-
 //        Intent intent = new Intent(SubjectsActivity.this, TutorSessionActivity.class);
 //        startActivity(intent);
 
